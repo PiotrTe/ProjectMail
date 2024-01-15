@@ -50,7 +50,7 @@ public class CheckpointPlacerEditor : EditorWindow
     {
         GUILayout.Label("Place Checkpoints", EditorStyles.boldLabel);
 
-        // Add fields to select enemy prefab and number of enemies
+        // Add fields to select enemy prefab and number of enemies.
         _enemyPrefab = (GameObject)EditorGUILayout.ObjectField("Enemy Prefab", _enemyPrefab, typeof(GameObject), false);
         _numberOfEnemies = EditorGUILayout.IntField("Number of Enemies", _numberOfEnemies);
 
