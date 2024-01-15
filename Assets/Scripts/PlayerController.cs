@@ -9,11 +9,13 @@ public class PlayerController : MonoBehaviour
     public float health = 200.0f;
     public PostProcessVolume volume;
     private Vignette vignette;
+    Animator m_Animator;
     
     // Start is called before the first frame update
     void Start()
     {
         rbody = GetComponent<Rigidbody>();
+        m_Animator = GetComponent<Animator>();
     }
     void Update()
     {
@@ -36,6 +38,15 @@ public class PlayerController : MonoBehaviour
 
         move.Normalize();
         rbody.AddForce(move * speed * Time.deltaTime, ForceMode.Impulse);
+
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D))
+        {
+            m_Animator.SetBool("isWalking", true);
+        }
+        else
+        {
+            m_Animator.SetBool("isWalking", false);
+        }
     }
     
     
