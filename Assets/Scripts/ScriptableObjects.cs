@@ -1,15 +1,14 @@
-using UnityEngine;
 using UnityEditor;
-
-[CreateAssetMenu(fileName = "PatrolRoute", menuName = "AI/Patrol Route", order = 1)]
+using UnityEngine;
 
 public class CheckpointPlacerEditor : EditorWindow
 {
     private GameObject _checkpointPrefab;
-    private GameObject _patrolRoutePrefab; // Add this line
-    private GameObject _patrolRouteInstance; // To store the instance
-    private GameObject _currentPatrolRoute; // The current instance of the patrol route
-    private int checkpointCounter = 0; // Counter for naming checkpoints
+    private GameObject _patrolRoutePrefab;
+    private GameObject _currentPatrolRoute;
+    private GameObject _enemyPrefab; // Enemy prefab
+    private int _numberOfEnemies = 3; // Number of enemies
+    private int checkpointCounter = 0;
     private bool _placingMode = false;
 
     [MenuItem("Tools/Checkpoint Placer")]
@@ -19,7 +18,6 @@ public class CheckpointPlacerEditor : EditorWindow
     }
     void OnEnable()
     {
-        // Load the patrol route prefab and checkpoint prefab by name in the assets
         LoadPrefabs();
     }
     private void LoadPrefabs()
@@ -52,27 +50,11 @@ public class CheckpointPlacerEditor : EditorWindow
     {
         GUILayout.Label("Place Checkpoints", EditorStyles.boldLabel);
 
-        // Display fields for prefabs (optional, to show what's loaded)
-        _checkpointPrefab = (GameObject)EditorGUILayout.ObjectField("Checkpoint Prefab", _checkpointPrefab, typeof(GameObject), false);
-        _patrolRoutePrefab = (GameObject)EditorGUILayout.ObjectField("Patrol Route Prefab", _patrolRoutePrefab, typeof(GameObject), false);
+        // Add fields to select enemy prefab and number of enemies
+        _enemyPrefab = (GameObject)EditorGUILayout.ObjectField("Enemy Prefab", _enemyPrefab, typeof(GameObject), false);
+        _numberOfEnemies = EditorGUILayout.IntField("Number of Enemies", _numberOfEnemies);
 
-        // Toggle for placing mode
-        bool newPlacingMode = GUILayout.Toggle(_placingMode, "Checkpoint Placing Mode", "Button");
-
-        if (newPlacingMode && !_placingMode)
-        {
-            // Instantiatea new patrol route from the prefab
-            if (_patrolRoutePrefab != null)
-            {
-                _currentPatrolRoute = Instantiate(_patrolRoutePrefab);
-                checkpointCounter = 1; // Reset the counter for each new patrol route
-                Undo.RegisterCreatedObjectUndo(_currentPatrolRoute, "Create Patrol Route");
-            }
-            else
-            {
-                Debug.LogError("Patrol Route Prefab is not assigned. Please assign a valid prefab.");
-            }
-        }_placingMode = newPlacingMode;
+        _placingMode = GUILayout.Toggle(_placingMode, "Toggle Placing Mode", "Button");
 
         if (_placingMode)
         {
@@ -99,6 +81,12 @@ public class CheckpointPlacerEditor : EditorWindow
                     _currentPatrolRoute = Instantiate(_patrolRoutePrefab);
                     checkpointCounter = 1; // Reset the counter for each new patrol route
                     Undo.RegisterCreatedObjectUndo(_currentPatrolRoute, "Create Patrol Route");
+                    PatrolRoute patrolRouteScript = _currentPatrolRoute.GetComponent<PatrolRoute>();
+                    if (patrolRouteScript != null)
+                    {
+                        patrolRouteScript.enemyPrefab = _enemyPrefab;
+                        patrolRouteScript.numberOfEnemies = _numberOfEnemies;
+                    }
                     
                 }
 
