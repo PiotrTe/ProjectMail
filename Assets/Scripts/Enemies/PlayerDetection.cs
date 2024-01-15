@@ -12,12 +12,14 @@ public class EnemyVisibilityDetection : MonoBehaviour
 
     void Start()
     {
-        enemies = GameObject.FindGameObjectsWithTag(target);
+        // Get the enemies from the EnemyManager
+        enemies = EnemyManager.Instance.GetEnemies();
         foreach (var enemy in enemies)
         {
             SetTransparency(enemy, 0f); // Initialize
         }
     }
+
     void Update()
     {
         foreach (GameObject enemy in enemies)
@@ -100,6 +102,11 @@ public class EnemyVisibilityDetection : MonoBehaviour
         if (renderer != null)
         {
             renderer.enabled = isVisible;
+        }
+
+        foreach (Transform child in enemy.transform)
+        {
+            child.gameObject.SetActive(isVisible);
         }
     }
 

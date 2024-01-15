@@ -4,22 +4,45 @@ using UnityEngine;
 
 public class PatrolRoute : MonoBehaviour
 {
-    public GameObject[] enemies; // Array to hold assigned enemies
+    public GameObject enemyPrefab; // Enemy prefab to instantiate
+    public int numberOfEnemies; // Number of enemies to spawn
+
+    public Color lineColor = Color.cyan; // Color of the Gizmos
 
     void Start()
     {
-        // Assign this route to each enemy
-        foreach (var enemy in enemies)
+        if (enemyPrefab == null)
         {
-            var enemyController = enemy.GetComponent<EnemyController>();
-            if (enemyController != null)
+            Debug.LogError("Enemy prefab is not assigned.");
+            return;
+        }
+
+        // Spawn enemies and assign them to this patrol route for (int i = 0; i < numberOfEnemies; i++)
+        {
+            for (int i = 0; i < numberOfEnemies; i++)
             {
-                enemyController.SetPatrolRoute(gameObject);
+                // Instantiate enemy at the position of the first checkpoint
+                // or at the patrol route's position if there are no checkpoints.
+                Vector3 spawnPosition = transform.childCount > 0 ? transform.GetChild(0).position : transform.position;
+
+                Quaternion spawnRotation = Quaternion.identity; // Default rotation
+
+                GameObject enemy = Instantiate(enemyPrefab, spawnPosition, spawnRotation);
+
+                // Now we assign the patrol route to the enemy
+                var enemyController = enemy.GetComponent<EnemyController>();
+                if (enemyController != null)
+                {
+                    enemyController.SetPatrolRoute(gameObject);
+                }
+                else
+                {
+                    Debug.LogError("Spawned enemy does not have an EnemyController component.");
+                }
             }
         }
     }
-
-    public Color lineColor = Color.cyan; // Color of the Gizmos
+    // GIZMOS //
 
     void OnDrawGizmos()
     {

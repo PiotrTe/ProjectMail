@@ -65,6 +65,7 @@ public class CheckpointPlacerEditor : EditorWindow
             if (_patrolRoutePrefab != null)
             {
                 _currentPatrolRoute = Instantiate(_patrolRoutePrefab);
+                checkpointCounter = 1; // Reset the counter for each new patrol route
                 Undo.RegisterCreatedObjectUndo(_currentPatrolRoute, "Create Patrol Route");
             }
             else
@@ -96,8 +97,9 @@ public class CheckpointPlacerEditor : EditorWindow
                 if (_currentPatrolRoute == null && _patrolRoutePrefab != null)
                 {
                     _currentPatrolRoute = Instantiate(_patrolRoutePrefab);
+                    checkpointCounter = 1; // Reset the counter for each new patrol route
                     Undo.RegisterCreatedObjectUndo(_currentPatrolRoute, "Create Patrol Route");
-                    checkpointCounter = 0; // Reset the counter for each new patrol route
+                    
                 }
 
                 GameObject newCheckpoint = PrefabUtility.InstantiatePrefab(_checkpointPrefab) as GameObject;

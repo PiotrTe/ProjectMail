@@ -3,19 +3,14 @@ using System.Collections.Generic; // For using List
 
 public class EnemyManager : MonoBehaviour
 {
-    // Singleton instance
     public static EnemyManager Instance { get; private set; }
+    private List<GameObject> enemies = new List<GameObject>();
 
-    // List to hold all enemies
-    private List<GameObject> _enemies = new List<GameObject>();
-
-    void Awake()
+    private void Awake()
     {
-        // Singleton setup
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -23,27 +18,18 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
-    // Method to add an enemy to the list
     public void AddEnemy(GameObject enemy)
     {
-        if (!_enemies.Contains(enemy))
-        {
-            _enemies.Add(enemy);
-        }
+        enemies.Add(enemy);
     }
 
-    // Method to remove an enemy from the list
     public void RemoveEnemy(GameObject enemy)
     {
-        if (_enemies.Contains(enemy))
-        {
-            _enemies.Remove(enemy);
-        }
+        enemies.Remove(enemy);
     }
 
-    // Method to get the list of all enemies
-    public List<GameObject> GetAllEnemies()
+    public GameObject[] GetEnemies()
     {
-        return _enemies;
+        return enemies.ToArray();
     }
 }
