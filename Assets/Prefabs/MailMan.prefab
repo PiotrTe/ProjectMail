@@ -132,7 +132,7 @@ MonoBehaviour:
   fieldOfView: 120
   fadeSpeed: 1
   proximityDistance: 2
-  target: 
+  target: Enemy
 --- !u!1 &8481970273358982421
 GameObject:
   m_ObjectHideFlags: 0
