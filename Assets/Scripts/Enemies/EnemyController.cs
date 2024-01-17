@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEditor;
 using UnityEngine;
@@ -10,12 +11,23 @@ public class EnemyController : MonoBehaviour
     private int currentCheckpointIndex = 0;
     private NavMeshAgent agent;
     public float viewRadius = 10f; // Detection range
-    public float viewAngle = 45f; // Angle of view
+    public float viewAngle = 115f; // Angle of view
+    public float rotationSpeed = 3f; // Speed of rotation for looking in specified direction
     private Transform player; // Reference to the player
     private Vector3 lastSeenPosition;
     private bool reachedLastSeenPosition;
+    private bool canMove;
     private float idleTimer;
     private float investigateTime;
+    private float cooldownTime = 2.0f;
+    private float cooldownTimer;
+    public float alertness = 0.0f;
+    public float maxAlertness = 100.0f; // Threshold for switching to investigation
+    public float alertnessIncreaseRate = 40.0f; // Rate at which alertness increases per second
+    public float sightAlertnessIncreaseRate = 80.0f; // Rate at which alertness increases per second
+    public float alertnessDecreaseRate = 20.0f; // Rate at which alertness increases per second
+    private float idleRotationAngle = 90f; // Maximum angle to rotate while idling
+
 
     
 
@@ -23,12 +35,20 @@ public class EnemyController : MonoBehaviour
 
 
     private State currentState = State.Patrolling;
-    
+
+    private void Awake()
+    {
+        EnemyManager.Instance.AddEnemy(gameObject);
+    }
+
     void Start()
     {
+        leftRotation = Quaternion.Euler(0, -idleRotationAngle, 0);
+        rightRotation = Quaternion.Euler(0, idleRotationAngle, 0);
+        targetRotation = leftRotation;
+        
         player = GameObject.FindGameObjectWithTag("Player").transform;
         agent = GetComponent<NavMeshAgent>();
-        EnemyManager.Instance.AddEnemy(gameObject);
         InitializeCheckpoints();
         MoveToNextCheckpoint();
     }
@@ -38,6 +58,24 @@ public class EnemyController : MonoBehaviour
     }
     void Update()
     {
+        UpdateMovementAbility();
+        if (HasLineOfSight())
+        {
+            SeePlayer(player.position);
+        }
+        
+        if (cooldownTimer > 0)
+        {
+            cooldownTimer -= Time.deltaTime;
+        }
+        else if (alertness > 0)
+        {
+            alertness -= alertnessDecreaseRate * Time.deltaTime;
+        }
+
+        // Ensure alertness doesn't go below 0
+        if (alertness < 0) { alertness = 0; }
+
         if (idleTimer > 0)
             HandleIdling();
         
@@ -111,20 +149,80 @@ public class EnemyController : MonoBehaviour
         Vector3 directionToPlayer = (player.position - transform.position).normalized;
         if (Physics.Raycast(transform.position, directionToPlayer, out hit, viewRadius, layerMask))
         {
-            if (hit.transform == player)
-            {
-                currentState = State.Chasing;
-                lastSeenPosition = player.position;
-                return true; // Player is in direct line of sight
-            }
+            return hit.transform == player; // Return true if player is in direct line of sight
         }
 
-        return false; // Obstacle is blocking the view
+        return false; // Return false if an obstacle is blocking the view
     }
-
-    // STATES //
-    void HandleChasing()
+    public void HearPlayer(Vector3 playerPosition)
+    {  
+        player.GetComponent<PlayerController>().TakeDamage(5);
+        RotateTowards(playerPosition);
+        alertness += alertnessIncreaseRate * Time.deltaTime;
+        cooldownTimer = cooldownTime; // Reset cooldown timer
+        if (alertness >= maxAlertness)
+        {
+            lastSeenPosition = playerPosition; // Update last seen position
+            currentState = State.Investigating;
+            reachedLastSeenPosition = false;
+            agent.SetDestination(lastSeenPosition);
+            ResetAlertness(); // Optionally reset alertness
+        }
+    }
+    public void SeePlayer(Vector3 playerPosition)
     {
+        
+        player.GetComponent<PlayerController>().TakeDamage(25);
+        RotateTowards(playerPosition);
+        alertness += sightAlertnessIncreaseRate * Time.deltaTime;
+        cooldownTimer = cooldownTime; // Reset cooldown timer
+
+        if (alertness >= maxAlertness)
+        {
+            alertness = maxAlertness;
+            lastSeenPosition = playerPosition; // Update last seen position
+            currentState = State.Chasing;
+            reachedLastSeenPosition = false;
+            agent.SetDestination(lastSeenPosition);
+            ResetAlertness(); // Optionally reset alertness
+        }
+    }
+    private void ResetAlertness()
+    {
+        alertness = 0.0f;
+    }
+    private void RotateTowards(Vector3 direction)
+    {
+        if (player == null) return; 
+        
+        Vector3 lookDirection = direction - transform.position;
+        lookDirection.y = 0; // Optional: Horizontal rotation only
+
+        // Calculate the rotation needed to look at the player
+        Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+
+        // Apply the rotation (smoothly or directly)
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+    }
+    // STATES //
+    private void UpdateMovementAbility()
+    {
+        // If alertness is rising and the enemy is not chasing, it should not move.
+        if (alertness > 0 && currentState == State.Patrolling)
+        {
+            canMove = false;
+        }
+        else
+        {
+            canMove = true;
+        }
+
+        // Enable or disable the agent's movement based on canMove.
+        agent.isStopped = !canMove;
+    }
+    public void HandleChasing()
+    {
+        canMove = true;
         if (player != null)
         {
             agent.SetDestination(player.position);    
@@ -145,6 +243,7 @@ public class EnemyController : MonoBehaviour
     }
     void HandleInvestigating()
     {
+        canMove = true;
         if (!reachedLastSeenPosition)
         {
             // Move to the last known position of the player.
@@ -153,23 +252,40 @@ public class EnemyController : MonoBehaviour
                 // Arrived at the last known position.
                 reachedLastSeenPosition = true;
                 currentState = State.Idling;
-                idleTimer += 10.0f;
+                idleTimer = 10.0f;
             }
         }
     }
+    
+    private Quaternion leftRotation;
+    private Quaternion rightRotation;
+    private Quaternion targetRotation;
     void HandleIdling()
     {
+        canMove = false;
+
         if (idleTimer <= 0f)
         {
             currentState = State.Patrolling;
+            idleTimer = 0;
         }
         else
         {
             idleTimer -= Time.deltaTime;
+
+            // Check if the rotation has reached the target, and switch the target
+            if (Quaternion.Angle(transform.rotation, targetRotation) < 1f)
+            {
+                targetRotation = (targetRotation == leftRotation) ? rightRotation : leftRotation;
+            }
+
+            // Perform smooth rotation
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, (rotationSpeed / 3) * Time.deltaTime);
         }
     }
     void HandlePatrolling()
     {
+        canMove = true;
         if (checkpoints == null || checkpoints.Length == 0) 
         {
             Debug.LogError("No checkpoints set for patrol route.");
@@ -210,7 +326,7 @@ public class EnemyController : MonoBehaviour
         GUIStyle style = new GUIStyle();
         style.normal.textColor = Color.white;
         style.fontSize = 12;
-        Handles.Label(transform.position + Vector3.up * 2.0f, (currentState.ToString() + idleTimer), style);
+        Handles.Label(transform.position + Vector3.up * 2.0f, (currentState.ToString() + idleTimer + alertness), style);
     }
     
 }

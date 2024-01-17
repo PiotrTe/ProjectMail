@@ -2,22 +2,16 @@ using UnityEngine;
 
 public class EnemyVisibilityDetection : MonoBehaviour
 {
-    public float maxViewDistance = 15f;
     public float fieldOfView = 60f;
     public float fadeSpeed = 0.5f; // Speed of fading in/out
     public float proximityDistance = 5f;
     public string target = "";
-
-    private GameObject[] enemies;
+    private bool isInitialized = false;
+    public GameObject[] enemies;
 
     void Start()
     {
-        // Get the enemies from the EnemyManager
-        enemies = EnemyManager.Instance.GetEnemies();
-        foreach (var enemy in enemies)
-        {
-            SetTransparency(enemy, 0f); // Initialize
-        }
+        Initialize();
     }
 
     void Update()
@@ -28,7 +22,7 @@ public class EnemyVisibilityDetection : MonoBehaviour
             float distanceToEnemy = directionToEnemy.magnitude;
             float angleToEnemy = Vector3.Angle(directionToEnemy, transform.forward);
 
-            if ((distanceToEnemy <= proximityDistance) && IsInLineOfSight(enemy, directionToEnemy) || (angleToEnemy < fieldOfView / 2 && IsInLineOfSight(enemy, directionToEnemy)))
+            if ((distanceToEnemy <= proximityDistance) && IsInLineOfSight(enemy) || (angleToEnemy < fieldOfView / 2 && IsInLineOfSight(enemy)))
             {
                 FadeIn(enemy); // Fade in when in proximity or in sight
             }
@@ -39,29 +33,63 @@ public class EnemyVisibilityDetection : MonoBehaviour
         }
     }
 
-    bool IsInLineOfSight(GameObject enemy, Vector3 directionToEnemy)
+    private void Initialize()
     {
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position, directionToEnemy.normalized, out hit, maxViewDistance))
+        if (isInitialized)
+            return;
+        
+        EnemyManager enemyManager = FindObjectOfType<EnemyManager>();
+        if (enemyManager != null)
         {
-            if (hit.collider.gameObject == enemy)
+            enemies = enemyManager.GetEnemies();
+            Debug.Log(enemies);
+            foreach (var enemy in enemies)
             {
-                return true;
+                SetTransparency(enemy, 0f); // Initialize
             }
-            else if (hit.collider.CompareTag(target))
+            isInitialized = true; // Mark as initialized
+        }
+        else
+        {
+            Debug.LogError("EnemyManager not found.");
+        }
+    }
+    bool IsInLineOfSight(GameObject enemy)
+    {
+        bool isInSight = false;
+
+        // Define several points on the enemy to test for visibility
+        Transform enemyTransform = enemy.transform;
+        var position = enemyTransform.position;
+        Vector3[] targetPoints = new Vector3[]
+        {
+            position + enemyTransform.up * 0.8f, // Head
+            position, // Chest
+            position - enemyTransform.up * 0.5f, // Feet
+            position + enemyTransform.right * 0.45f, // Right hand
+            position - enemyTransform.right * 0.45f, // Left hand
+            // ... Add more offsets for other body parts if needed
+        };
+
+        foreach (Vector3 targetPoint in targetPoints)
+        {
+            Vector3 directionToTarget = (targetPoint - transform.position).normalized;
+            RaycastHit hit;
+            
+            if (Physics.Raycast(transform.position, directionToTarget, out hit, maxViewDistance))
             {
-                Collider hitEnemyCollider = hit.collider;
-                hitEnemyCollider.enabled = false;
-
-                bool lineOfSight = Physics.Raycast(transform.position, directionToEnemy.normalized, out hit, maxViewDistance) && hit.collider.gameObject == enemy;
-
-                hitEnemyCollider.enabled = true;
-
-                return lineOfSight;
+                if (hit.collider.gameObject == enemy)
+                {
+                    isInSight = true; // Enemy is in direct line of sight
+                    break; // No need to check other points if one is already in sight
+                }
             }
         }
-        return false;
+
+        return isInSight; // Return true if any part of the enemy is in direct line of sight
     }
+
+    private float maxViewDistance = 100f; // Example max view distance
 
     void FadeIn(GameObject enemy)
     {

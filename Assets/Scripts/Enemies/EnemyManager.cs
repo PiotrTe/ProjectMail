@@ -21,11 +21,13 @@ public class EnemyManager : MonoBehaviour
     public void AddEnemy(GameObject enemy)
     {
         enemies.Add(enemy);
+        Debug.Log("Enemy added");
     }
 
     public void RemoveEnemy(GameObject enemy)
     {
         enemies.Remove(enemy);
+        Debug.Log("Enemy removed");
     }
 
     public GameObject[] GetEnemies()
