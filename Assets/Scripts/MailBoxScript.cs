@@ -8,6 +8,7 @@ public class MailBoxScript : MonoBehaviour
     public GameObject mailMan;
     GameDirectorScript GameDirector;
     Animator m_Animator;
+    bool collected = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -23,11 +24,15 @@ public class MailBoxScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Player"))
+        if (collected == false)
         {
-            GameDirector.IncrementObjectiveCounter();
-            m_Animator.SetBool("MailIn", true);
-            Debug.Log("Mail put in mailbox");
+            if (other.gameObject.CompareTag("Player"))
+            {
+                GameDirector.IncrementObjectiveCounter();
+                m_Animator.SetBool("MailIn", true);
+                Debug.Log("Mail put in mailbox");
+                collected = true;
+            }
         }
     }
 }
