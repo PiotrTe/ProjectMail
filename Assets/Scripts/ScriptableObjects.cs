@@ -7,7 +7,7 @@ public class CheckpointPlacerEditor : EditorWindow
     private GameObject _patrolRoutePrefab;
     private GameObject _currentPatrolRoute;
     private GameObject _enemyPrefab; // Enemy prefab
-    private int _numberOfEnemies = 3; // Number of enemies
+    private int _numberOfEnemies = 1; // Number of enemies
     private int checkpointCounter = 0;
     private bool _placingMode = false;
 
@@ -19,7 +19,13 @@ public class CheckpointPlacerEditor : EditorWindow
     void OnEnable()
     {
         LoadPrefabs();
+        _numberOfEnemies = EditorPrefs.GetInt("NumberOfEnemies", 1); // Load saved value or default to 3
     }
+    void OnDisable()
+    {
+        EditorPrefs.SetInt("NumberOfEnemies", _numberOfEnemies); // Save the current setting
+    }
+    
     private void LoadPrefabs()
     {
         _checkpointPrefab = LoadPrefabByName("Checkpoint");
@@ -58,11 +64,19 @@ public class CheckpointPlacerEditor : EditorWindow
 
         if (_placingMode)
         {
+            if (_currentPatrolRoute == null)
+            {
+                // Start a new patrol route
+                _currentPatrolRoute = Instantiate(_patrolRoutePrefab);
+                checkpointCounter = 1; // Reset the counter for each new patrol route
+                Undo.RegisterCreatedObjectUndo(_currentPatrolRoute, "Create Patrol Route");
+            }
             SceneView.duringSceneGui += OnSceneGUI;
         }
         else
         {
             SceneView.duringSceneGui -= OnSceneGUI;
+            _currentPatrolRoute = null;
         }
     }
     void OnSceneGUI(SceneView sceneView)

@@ -6,10 +6,6 @@ public class CameraController : MonoBehaviour
 {
     public Transform player;
     private Vector3 offset;
-
-    public float shakeStrength = 0.0f;
-    public float shakeDuration = 0.0f;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -25,8 +21,4 @@ public class CameraController : MonoBehaviour
 
     }
 
-    public void Shake(float shakeStrength, float shakeDuration)
-    {
-
-    }
 }

@@ -39,7 +39,6 @@ public class PlayerController : MonoBehaviour
         Ray cursorRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         Plane characterPlane = new Plane(Vector3.up, transform.position);
         float intersectionDistance;
-        UpdateVignetteEffect();
         if (stress >= maxStress)
         {
             Die();
