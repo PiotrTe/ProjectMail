@@ -23,8 +23,8 @@ public class EnemyController : MonoBehaviour
     private float cooldownTimer;
     public float alertness = 0.0f;
     public float maxAlertness = 100.0f; // Threshold for switching to investigation
-    public float alertnessIncreaseRate = 40.0f; // Rate at which alertness increases per second
-    public float sightAlertnessIncreaseRate = 80.0f; // Rate at which alertness increases per second
+    public float alertnessIncreaseRate = 100.0f; // Rate at which alertness increases per second
+    public float sightAlertnessIncreaseRate = 100.0f; // Rate at which alertness increases per second
     public float alertnessDecreaseRate = 20.0f; // Rate at which alertness increases per second
     private float idleRotationAngle = 90f; // Maximum angle to rotate while idling
 
