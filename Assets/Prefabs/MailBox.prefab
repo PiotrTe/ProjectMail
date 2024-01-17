@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 102597634222869177}
   m_Layer: 0
   m_Name: MailBox
-  m_TagString: Untagged
+  m_TagString: Objective
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -95,7 +95,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MailMan: {fileID: 8481970273358982421, guid: 72011b0c3bd2e3e40a045051c97a7a5a, type: 3}
-  GameDirectorScript: {fileID: 0}
 --- !u!1 &2167439309691216130
 GameObject:
   m_ObjectHideFlags: 0

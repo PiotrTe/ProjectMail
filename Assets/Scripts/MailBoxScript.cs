@@ -25,8 +25,8 @@ public class MailBoxScript : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player"))
         {
+            GameDirector.IncrementObjectiveCounter();
             m_Animator.SetBool("MailIn", true);
-            GameDirector.ObjectiveCounter++;
             Debug.Log("Mail put in mailbox");
         }
     }
