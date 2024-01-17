@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameDirectorScript : MonoBehaviour
 {
@@ -10,6 +11,8 @@ public class GameDirectorScript : MonoBehaviour
     public GameObject[] MailBoxes;
     public int ObjectiveCounter = 0;
     bool ObjectiveComplete = false;
+    public bool endTrigger;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -20,6 +23,7 @@ public class GameDirectorScript : MonoBehaviour
         {
             objectiveText.text = "Remaining Deliveries: " + ObjectiveCounter + "/" + MailBoxes.Length;
         }
+
     }
     // Update is called once per frame
     void Update()
@@ -28,11 +32,21 @@ public class GameDirectorScript : MonoBehaviour
         {
             if (ObjectiveCounter == MailBoxes.Length)
             {
-                Debug.Log("Objective Complete!");
+                objectiveText.text = "All Newspapers Delivered, Escape!";
                 ObjectiveComplete = true;
 
             }
         }
+
+        if (endTrigger == true)
+        {
+            if (ObjectiveCounter == MailBoxes.Length)
+            {
+                objectiveText.text = "Escaped!";
+                SceneManagementController.Instance.LoadScene("WinScene");
+            }
+        }
+
     }
     public void IncrementObjectiveCounter()
     {
@@ -44,6 +58,4 @@ public class GameDirectorScript : MonoBehaviour
             objectiveText.text = "Remaining Deliveries: " + ObjectiveCounter + "/" + MailBoxes.Length;
         }
     }
-
-    
 }
