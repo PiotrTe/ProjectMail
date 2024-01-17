@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.Rendering.Universal;
 
 public class PlayerController : MonoBehaviour
@@ -15,7 +14,7 @@ public class PlayerController : MonoBehaviour
     public Volume globalVolume; // Assign this in the Inspector
     private Vignette vignette;
     public float stress = 0.0f;
-    public float maxStress = 100.0f;
+    public float maxStress = 200.0f;
     Rigidbody rbody;
     Animator m_Animator;
     private bool isSneaking;
@@ -41,6 +40,10 @@ public class PlayerController : MonoBehaviour
         Plane characterPlane = new Plane(Vector3.up, transform.position);
         float intersectionDistance;
         UpdateVignetteEffect();
+        if (stress >= maxStress)
+        {
+            Die();
+        }
         if (characterPlane.Raycast(cursorRay, out intersectionDistance))
         {
             Vector3 intersectionPoint = cursorRay.origin + cursorRay.direction * intersectionDistance;
@@ -71,7 +74,15 @@ public class PlayerController : MonoBehaviour
         UpdateSoundRange(rbody.velocity.magnitude);
         CheckForEnemies();
     }
-
+    void Die()
+    {
+        speed = 0f;
+        Invoke("LoadDeathScene", 2f);
+    }
+    void LoadDeathScene()
+    {
+        SceneManagementController.Instance.LoadScene("DeathScene");
+    }
     private void UpdateSoundRange(float velocityMagnitude)
     {
         // Example: Map the velocity magnitude to a sound range between 5 and 10
