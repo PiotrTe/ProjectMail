@@ -74,15 +74,6 @@ public class PlayerController : MonoBehaviour
         // Animation
         m_Animator.SetBool("isWalking", move.magnitude > 0);
         
-        if (move.magnitude > 0)
-        {
-            footSteps.enabled = true;
-        }
-        else
-        {
-            footSteps.enabled = false;
-        }
-        
         // Update sound range based on velocity
         UpdateSoundRange(rbody.velocity.magnitude);
         CheckForEnemies();
@@ -98,13 +89,12 @@ public class PlayerController : MonoBehaviour
     }
     private void UpdateSoundRange(float velocityMagnitude)
     {
-        // Example: Map the velocity magnitude to a sound range between 5 and 10
-        // Adjust these values according to your game's needs
         float minVelocity = 0f;  // Minimum velocity to start making sound
         float maxVelocity = 10f; // Velocity at which sound range is at maximum
-
+        
         // Normalize the velocity into a 0-1 range and then interpolate sound range
         float normalizedVelocity = Mathf.Clamp((velocityMagnitude - minVelocity) / (maxVelocity - minVelocity), 0f, 1f);
+        footSteps.volume = Mathf.Lerp(0f, isSneaking ? 0.5f : 1f, normalizedVelocity);
         soundRange = Mathf.Lerp(0f, isSneaking ? 5f : 10f, normalizedVelocity);
     }
     private void CheckForEnemies()

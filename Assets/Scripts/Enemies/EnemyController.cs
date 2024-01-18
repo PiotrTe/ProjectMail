@@ -27,7 +27,7 @@ public class EnemyController : MonoBehaviour
     public float sightAlertnessIncreaseRate = 100.0f; // Rate at which alertness increases per second
     public float alertnessDecreaseRate = 20.0f; // Rate at which alertness increases per second
     private float idleRotationAngle = 90f; // Maximum angle to rotate while idling
-
+    public AudioSource footSteps;
 
     
 
@@ -43,6 +43,7 @@ public class EnemyController : MonoBehaviour
 
     void Start()
     {
+        footSteps.Play();
         leftRotation = Quaternion.Euler(0, -idleRotationAngle, 0);
         rightRotation = Quaternion.Euler(0, idleRotationAngle, 0);
         targetRotation = leftRotation;
@@ -58,12 +59,12 @@ public class EnemyController : MonoBehaviour
     }
     void Update()
     {
+        ManageFootstepSounds();
         UpdateMovementAbility();
         if (HasLineOfSight())
         {
             SeePlayer(player.position);
         }
-        
         if (cooldownTimer > 0)
         {
             cooldownTimer -= Time.deltaTime;
@@ -302,7 +303,20 @@ public class EnemyController : MonoBehaviour
             MoveToNextCheckpoint();
         }
     }
-
+    private void ManageFootstepSounds()
+    {
+        // Check if the enemy is moving
+        if (agent.velocity.magnitude > 0.1f && !footSteps.isPlaying)
+        {
+            // Play footsteps if not already playing
+            footSteps.Play();
+        }
+        else if (agent.velocity.magnitude <= 0.1f && footSteps.isPlaying)
+        {
+            // Stop footsteps if currently playing and enemy is not moving
+            footSteps.Stop();
+        }
+    }
     
     // GIZMOS //
     void OnDrawGizmos()
