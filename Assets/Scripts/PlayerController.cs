@@ -25,6 +25,8 @@ public class PlayerController : MonoBehaviour
     {
         rbody = GetComponent<Rigidbody>();
 
+        footSteps.Play();
+
         m_Animator = GetComponent<Animator>();
 
         if (globalVolume.profile.TryGet<Vignette>(out vignette))
@@ -80,7 +82,7 @@ public class PlayerController : MonoBehaviour
         {
             footSteps.enabled = false;
         }
-
+        
         // Update sound range based on velocity
         UpdateSoundRange(rbody.velocity.magnitude);
         CheckForEnemies();
