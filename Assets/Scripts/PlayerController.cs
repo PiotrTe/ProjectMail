@@ -61,7 +61,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 move = new Vector3(Input.GetAxisRaw("Horizontal"), 0 ,Input.GetAxisRaw("Vertical"));
         move.Normalize();
-        isSneaking = Input.GetKey(KeyCode.LeftControl);
+        isSneaking = Input.GetKey(KeyCode.LeftShift);
 
         float currentForce = isSneaking ? sneakSpeed : speed;
         rbody.AddForce(move * (currentForce * Time.deltaTime), ForceMode.Impulse);

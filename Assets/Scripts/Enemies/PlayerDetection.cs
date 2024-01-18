@@ -16,6 +16,7 @@ public class EnemyVisibilityDetection : MonoBehaviour
 
     void Update()
     {
+        enemies = EnemyManager.Instance.GetEnemies();
         foreach (GameObject enemy in enemies)
         {
             Vector3 directionToEnemy = enemy.transform.position - transform.position;
