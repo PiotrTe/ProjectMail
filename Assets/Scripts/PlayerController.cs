@@ -18,12 +18,15 @@ public class PlayerController : MonoBehaviour
     Rigidbody rbody;
     Animator m_Animator;
     private bool isSneaking;
+    public AudioSource footSteps;
     
     // Start is called before the first frame update
     void Start()
     {
         rbody = GetComponent<Rigidbody>();
+
         m_Animator = GetComponent<Animator>();
+
         if (globalVolume.profile.TryGet<Vignette>(out vignette))
         {
             // Vignette component found
@@ -68,6 +71,15 @@ public class PlayerController : MonoBehaviour
 
         // Animation
         m_Animator.SetBool("isWalking", move.magnitude > 0);
+        
+        if (move.magnitude > 0)
+        {
+            footSteps.enabled = true;
+        }
+        else
+        {
+            footSteps.enabled = false;
+        }
 
         // Update sound range based on velocity
         UpdateSoundRange(rbody.velocity.magnitude);
