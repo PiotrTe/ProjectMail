@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MailBoxScript : MonoBehaviour
 {
-    public GameObject MailMan;
+    public GameObject mailMan;
     GameDirectorScript GameDirector;
     Animator m_Animator;
     bool collected = false;

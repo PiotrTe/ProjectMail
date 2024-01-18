@@ -88,12 +88,15 @@ public class EnemyController : MonoBehaviour
                     currentState = State.Patrolling;
                 break;
             case State.Patrolling:
+                agent.speed = 3.5f;
                 HandlePatrolling();
                 break;
             case State.Investigating:
+                agent.speed = 3.5f;
                 HandleInvestigating();
                 break;
             case State.Chasing:
+                agent.speed = 7.0f;
                 HandleChasing();
                 break;
         }

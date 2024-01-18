@@ -7,7 +7,7 @@ public class CheckpointPlacerEditor : EditorWindow
     private GameObject _patrolRoutePrefab;
     private GameObject _currentPatrolRoute;
     private GameObject _enemyPrefab; // Enemy prefab
-    private int _numberOfEnemies = 3; // Number of enemies
+    private int _numberOfEnemies = 1; // Number of enemies
     private int checkpointCounter = 0;
     private bool _placingMode = false;
 
@@ -19,7 +19,13 @@ public class CheckpointPlacerEditor : EditorWindow
     void OnEnable()
     {
         LoadPrefabs();
+        _numberOfEnemies = EditorPrefs.GetInt("NumberOfEnemies", 1); // Load saved value or default to 3
     }
+    void OnDisable()
+    {
+        EditorPrefs.SetInt("NumberOfEnemies", _numberOfEnemies); // Save the current setting
+    }
+    
     private void LoadPrefabs()
     {
         _checkpointPrefab = LoadPrefabByName("Checkpoint");
@@ -56,14 +62,27 @@ public class CheckpointPlacerEditor : EditorWindow
 
         _placingMode = GUILayout.Toggle(_placingMode, "Toggle Placing Mode", "Button");
 
-        if (_placingMode)
+    if (_placingMode)
+    {
+        if (_currentPatrolRoute == null)
         {
-            SceneView.duringSceneGui += OnSceneGUI;
+            _currentPatrolRoute = Instantiate(_patrolRoutePrefab);
+            checkpointCounter = 1; // Reset the counter for each new patrol route
+            Undo.RegisterCreatedObjectUndo(_currentPatrolRoute, "Create Patrol Route");
+            PatrolRoute patrolRouteScript = _currentPatrolRoute.GetComponent<PatrolRoute>();
+            if (patrolRouteScript != null)
+            {
+                patrolRouteScript.enemyPrefab = _enemyPrefab;
+                patrolRouteScript.numberOfEnemies = _numberOfEnemies;
+            }
         }
-        else
-        {
-            SceneView.duringSceneGui -= OnSceneGUI;
-        }
+        SceneView.duringSceneGui += OnSceneGUI;
+    }
+    else
+    {
+        SceneView.duringSceneGui -= OnSceneGUI;
+        _currentPatrolRoute = null; // Reset current patrol route when exiting placing mode
+    }
     }
     void OnSceneGUI(SceneView sceneView)
     {
