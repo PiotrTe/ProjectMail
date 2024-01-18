@@ -62,22 +62,27 @@ public class CheckpointPlacerEditor : EditorWindow
 
         _placingMode = GUILayout.Toggle(_placingMode, "Toggle Placing Mode", "Button");
 
-        if (_placingMode)
+    if (_placingMode)
+    {
+        if (_currentPatrolRoute == null)
         {
-            if (_currentPatrolRoute == null)
+            _currentPatrolRoute = Instantiate(_patrolRoutePrefab);
+            checkpointCounter = 1; // Reset the counter for each new patrol route
+            Undo.RegisterCreatedObjectUndo(_currentPatrolRoute, "Create Patrol Route");
+            PatrolRoute patrolRouteScript = _currentPatrolRoute.GetComponent<PatrolRoute>();
+            if (patrolRouteScript != null)
             {
-                // Start a new patrol route
-                _currentPatrolRoute = Instantiate(_patrolRoutePrefab);
-                checkpointCounter = 1; // Reset the counter for each new patrol route
-                Undo.RegisterCreatedObjectUndo(_currentPatrolRoute, "Create Patrol Route");
+                patrolRouteScript.enemyPrefab = _enemyPrefab;
+                patrolRouteScript.numberOfEnemies = _numberOfEnemies;
             }
-            SceneView.duringSceneGui += OnSceneGUI;
         }
-        else
-        {
-            SceneView.duringSceneGui -= OnSceneGUI;
-            _currentPatrolRoute = null;
-        }
+        SceneView.duringSceneGui += OnSceneGUI;
+    }
+    else
+    {
+        SceneView.duringSceneGui -= OnSceneGUI;
+        _currentPatrolRoute = null; // Reset current patrol route when exiting placing mode
+    }
     }
     void OnSceneGUI(SceneView sceneView)
     {
